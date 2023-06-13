@@ -10,24 +10,22 @@ This is a dysfunctional [Piet](https://www.dangermouse.net/esoteric/piet.html) i
 
 Initial commit: All this does is traverse codel blocks. It doesn't execute anything, chiefly, commands that adjust the pointer.
 
-Boo-hoo.. I tried to get fancy with the DP/CC and it's not happy. It picks the wrong exit points on large blocks by always checking column then row.
-
 ### To run
 
 ```sh
 clj -X:run '{:file "programs/file.png"}'
 ```
 
-`:codel-size` and `verbose?` default to `1` and `true`.
+`:codel-size`, `:verbose?`, and `:limit` default to `1`, `true`, and `0` (unlimited).
 
 ### Program status
 
 - [factorial](./programs/factorial.png) ❌ no pointer manipulation
 - [hello-world-1](./programs/hello-world-1.png) ❌ no pointer manipulation
-- [hello-world-2](./programs/hello-world-2.png) ❌ bad traversal algorithm
+- [hello-world-2](./programs/hello-world-2.png) ✅
 - [hello-world-3](./programs/hello-world-3.png) ✅
 - [pi](./programs/pi.png) ✅
-- [sample-1](./programs/sample-1.png) ✅
+- [corner-test](./programs/corner-test.png) ✅
 
 Most of the programs are reused or slightly edited from [Piet sample programs](https://www.dangermouse.net/esoteric/piet/samples.html).
 

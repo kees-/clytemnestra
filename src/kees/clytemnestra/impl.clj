@@ -11,8 +11,8 @@
 ;;   and tone lookups for black and white—which shouldn't happen anyway—are nil.
 ;; 
 ;; Compass: combination of DP and CC.
-;;   The CC is represented by -1 and 1. Gotcha! That's for a concise flip.
-;; 
+;;   The CC is represented by -1 and 1. Gotcha! For a concise flip.
+;;   -1 left, 1 right
 
 ;; ========== IMAGE PROCESSING =================================================
 (def valid-formats ["png" "gif"])
@@ -53,6 +53,7 @@
    -4194112  [:magenta :dark]})
 
 (defn image->canvas
+  "Take an image file with dimensions and find color values for every pixel."
   [file w h size]
   (let [column (fn [n h]
                  (mapv #(color-map (.getRGB file n (* % size)))
@@ -79,6 +80,7 @@
   [coord]
   (map #(mapv + coord %) nextdoor-neighbors))
 
+;; Thank you clj-piet for greatly improving my block search performance
 (defn find-block
   "From a coordinate, find the expanse of its block on the canvas."
   [canvas coord]
@@ -86,13 +88,16 @@
         family? #(= color (get-in canvas %))]
     (when-not color
       (throw (Exception. "How did you get here? That pixel is off the canvas.")))
-    (loop [family #{coord}]
-      (let [all-neighbors (reduce into #{} (map nextdoor family))
-            new-neighbors (set/difference all-neighbors family)
-            new-family (filter family? new-neighbors)]
-        (if-not (seq new-family)
-          family
-          (recur (into family new-family)))))))
+    (loop [family #{coord}
+           neighborhood #{coord}]
+      (if-not (seq neighborhood)
+        family
+        (let [neighbors (->> neighborhood
+                             (mapv nextdoor)
+                             (reduce into #{})
+                             (set/select family?))]
+          (recur (set/union family neighborhood)
+                 (set/difference neighbors family)))))))
 
 ;; ========== CANVAS TRAVERSING ================================================
 (def seed
@@ -112,29 +117,15 @@
 (def clockwise {:right :down :down :left :left :up :up :right})
 (def counterclockwise {:right :up :up :left :left :down :down :right})
 
-;; There are four possible directional outcomes based on dp and cc
-;; Top right:
-;;   right-left  -> right-up
-;;   up-right    -> up-right
-;; Bottom right
-;;   right-right -> right-down
-;;   down-left   -> down-right
-;; Bottom left
-;;   down-right  -> down-left
-;;   left-left   -> left-down
-;; Top left
-;;   left-right  -> left-up
-;;   up-left     -> up-left
-;; 
-;; That seems redundent, but see that the absolute CC linear direction
-;; converts to a consistent relative cardinal direction.
-
 (def compasses
   {[:right :up] [max min]
    [:down :right] [max max]
    [:down :left] [min max]
    [:left :up] [min min]})
 
+;; Interested how I can simplify this at least for readability..
+;; DP and CC are treated as interchangeable to determine prevailing direction,
+;; but DP is needed to find the order in which that direction is traveled.
 (defn find-corner
   "Given the state of the compass, find a block's 'outermost' coordinate."
   [state]
@@ -143,12 +134,18 @@
     (if (= 1 (count block))
       (first block)
       (let [absolute-cc (dp (if (pos? cc) clockwise counterclockwise))
-            [x y] (compasses (sort [dp absolute-cc]))
-            edge (reduce x (map first block))
-            edges (filter #(= edge (first %)) block)]
-        [edge (reduce y (map second edges))]))))
+            order (if (some #{dp} [:up :down]) reverse identity)
+            [extreme-1 extreme-2] (order (compasses (sort [dp absolute-cc])))
+            [axis-1 axis-2] (order [first second])
+            edge-1 (reduce extreme-1 (map axis-1 block))
+            edges (filter #(= edge-1 (axis-1 %)) block)
+            edge-2 (reduce extreme-2 (map axis-2 edges))
+            corner (vec (order [edge-1 edge-2]))]
+        corner))))
 
 (defn next-step
+  "Find the extreme of the currently occupied block and step forward 1 codel.
+   Doesn't check for validity!"
   [state]
   (let [{:keys [compass]} state
         dp (first compass)
@@ -156,7 +153,7 @@
     (mapv + corner (dp adjacent))))
 
 (defn next-compass
-  "The compass alternated between flipping the CC and rotating the DP."
+  "Flip the CC or rotate the DP depending on how many times it's done so."
   [state]
   (if (even? (:bonks state))
     (update-in state [:compass 1] -)
@@ -174,12 +171,16 @@
       :white :slide
       :continue)))
 
+(defn state-terminate
+  "Signal the program is complete."
+  [_ state]
+  (assoc state :terminate? true))
+
 (defn state-continue
+  "Exit the extreme of the current block into the next."
   [canvas state]
-  (let [{:keys [compass block]} state
-        dp (first compass)
-        pointer (find-corner state)
-        new-pointer (mapv + pointer (dp adjacent))]
+  (let [{:keys [block]} state
+        new-pointer (next-step state)]
     (-> state
         (assoc :bonks 0
                :pointer new-pointer
@@ -188,61 +189,64 @@
 
 (defn state-search
   "Having determined the pointer can't step forward,
-   update the state in preparation of searching somewhere else."
+   prepare to search somewhere else."
   [_ state]
   (-> state
       next-compass
       (update :bonks inc)))
 
 ;; White's behavior is unusual.
+;; How can I improve this?
 (defn state-slide
   "The pointer's next step is onto white; go forward until something changes."
-  [canvas state]
-  (loop [state (update state :pointer #(mapv + (-> state :compass first adjacent) %))
-         visited []]
-    (let [direction (-> state :compass first adjacent)
-          {:keys [pointer]} state
-          position [pointer direction]]
-      (if (some #(= position %) visited)
+  ([canvas state] (let [state (assoc state
+                                     :pointer (next-step state)
+                                     :bonks 0)]
+                    (state-slide canvas state [])))
+  ([canvas state visited]
+   (let [direction (-> state :compass first adjacent)
+         {:keys [pointer]} state
+         position [pointer direction]]
+     (if (some #(= position %) visited)
         ;; Exit point
-        (assoc state :terminate? true)
-        (let [path (iterate #(mapv + % direction) pointer)
-              end (last (take-while #(= [:white] (get-in canvas %)) path))
-              new-pointer (mapv + end direction)
-              codel (get-in canvas new-pointer)]
-          (if (and (some? codel) (not= [:black] codel))
+       (state-terminate canvas state)
+       (let [path (iterate #(mapv + % direction) pointer)
+             end (last (take-while #(= [:white] (get-in canvas %)) path))
+             new-pointer (mapv + end direction)
+             codel (get-in canvas new-pointer)]
+         (if (and (some? codel) (not= [:black] codel))
             ;; Exit point
-            (assoc state
-                   :pointer new-pointer
-                   :block (find-block canvas new-pointer))
-            (recur (-> state
-                       (update-in [:compass 0] clockwise)
-                       (update-in [:compass 1] -)
-                       (assoc :pointer end))
-                   (conj visited position))))))))
+           (assoc state
+                  :pointer new-pointer
+                  :block (find-block canvas new-pointer))
+           (recur canvas
+                  (-> state
+                      (update-in [:compass 0] clockwise)
+                      (update-in [:compass 1] -)
+                      (assoc :pointer end))
+                  (conj visited position))))))))
 
 (defn tick-state
+  "Calculate the subsequent state based on what was determined to happen next."
   [canvas state effect]
-  (update
-   (case effect
-     :slide (state-slide canvas (assoc state :pointer (find-corner state)))
-     :continue (state-continue canvas (assoc state :pointer (find-corner state)))
-     :search (state-search canvas state)
-     :terminate (assoc state :terminate? true)
-     (assoc state :terminate? true))
-   :steps inc))
+  (let [instruction (case effect
+                      :slide state-slide
+                      :continue state-continue
+                      :search state-search
+                      :terminate state-terminate
+                      state-terminate)]
+    (instruction canvas (update state :steps inc))))
 
 (defn interpreter
   [canvas verbose? limit]
   (when verbose? (println "Hi!"))
   (loop [state (assoc seed :block (find-block canvas (:pointer seed)))]
-    (when (< limit (:steps state))
+    (when (and (pos? limit) (< limit (:steps state)))
       (throw (Exception. "Number of steps exceeded limit")))
     (when-not (seq (:pointer state))
       (throw (Exception. "The pointer got lost!")))
     (let [instruction (instruct canvas state)]
-      (when verbose?
-        (println instruction (dissoc state :block)))
+      (when verbose? (println instruction (dissoc state :block)))
       (if (:terminate? state)
         state
         (recur (tick-state canvas state instruction))))))
