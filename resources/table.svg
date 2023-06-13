@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="576" height="305">
+  <style type="text/css">
+    table{border-collapse:collapse;border-spacing:0;font-size:0.75rem;}
+    th,td{border-color:black;border-style:solid;border-width:1px;font-family:monospace;overflow:hidden;padding:10px 5px;word-break:normal;}
+    .tg-790t{background-color:#0000ff;color:#fff;}
+    .tg-chxj{background-color:#00c0c0;color:#fff;}
+    .tg-r79l{background-color:#00ffff;}
+    .tg-gi1v{background-color:#ffc0c0;}
+    .tg-1fiy{background-color:#0000c0;color:#fff;}
+    .tg-g512{background-color:#c0ffff;}
+    .tg-pruv{background-color:#c0c000;color:#fff;}
+    .tg-tcp5{background-color:#ff00ff;}
+    .tg-qqgd{background-color:#ff0000;color:#fff;}
+    .tg-wp8o{text-align:center;}
+    .tg-y5fa{background-color:#ffffc0;}
+    .tg-epga{background-color:#c00000;color:#fff;}
+    .tg-p0kf{background-color:#000;color:#fff;text-align:center;}
+    .tg-zs09{background-color:#ffff00;}
+    .tg-mcqj{font-weight:bold;}
+    .tg-76ql{background-color:#c0ffc0;}
+    .tg-1icd{background-color:#c0c0ff;}
+    .tg-085m{background-color:#ffc0ff;}
+    .tg-uhx3{background-color:#00ff00;}
+    .tg-2deu{background-color:#00c000;color:#fff;}
+    .tg-ah6h{background-color:#c000c0;color:#fff;}
+    </style>
+  <foreignObject class="node" x="0" y="0" width="576" height="305">
+    <body xmlns="http://www.w3.org/1999/xhtml">
+      <table>
+        <thead>
+          <tr>
+            <th class="tg-mcqj">Red</th>
+            <th class="tg-mcqj">Yellow</th>
+            <th class="tg-mcqj">Green</th>
+            <th class="tg-mcqj">Cyan</th>
+            <th class="tg-mcqj">Blue</th>
+            <th class="tg-mcqj">Magenta</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="tg-gi1v">FFC0C0<br />-16192<br />255 192 192</td>
+            <td class="tg-y5fa">FFFFC0<br />-64<br />255 255 192</td>
+            <td class="tg-76ql">C0FFC0<br />-4128832<br />192 255 192</td>
+            <td class="tg-g512">C0FFFF<br />-4128769<br />192 255 255</td>
+            <td class="tg-1icd">C0C0FF<br />-4144897<br />255 192 192</td>
+            <td class="tg-085m">FFC0FF<br />-16129<br />255 192 255</td>
+          </tr>
+          <tr>
+            <td class="tg-qqgd">FF0000<br />-65536<br />255 0 0</td>
+            <td class="tg-zs09">FFFF00<br />-256<br />255 255 0</td>
+            <td class="tg-uhx3">00FF00<br />-16711936<br />0 255 0</td>
+            <td class="tg-r79l">00FFFF<br />-16711681<br />0 255 255</td>
+            <td class="tg-790t">0000FF<br />-16776961<br />0 0 255</td>
+            <td class="tg-tcp5">FF00FF<br />-65281<br />255 0 255</td>
+          </tr>
+          <tr>
+            <td class="tg-epga">C00000<br />-4194304<br />192 0 0</td>
+            <td class="tg-pruv">C0C000<br />-4145152<br />192 192 0</td>
+            <td class="tg-2deu">00C000<br />-16728064<br />0 192 0</td>
+            <td class="tg-chxj">00C0C0<br />-16727872<br />0 192 192</td>
+            <td class="tg-1fiy">0000C0<br />-16777024<br />0 0 192</td>
+            <td class="tg-ah6h">C000C0<br />-4194112<br />192 0 192</td>
+          </tr>
+          <tr>
+            <td class="tg-wp8o" colspan="3">FFFFFF<br />-1<br />255 255 255</td>
+            <td class="tg-p0kf" colspan="3">000000<br />-16777216<br />0 0 0</td>
+          </tr>
+        </tbody>
+        </table>        
+    </body>
+  </foreignObject>
+</svg>

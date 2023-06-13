@@ -1,0 +1,7 @@
+{:paths ["src"]
+ :deps {babashka/babashka {:mvn/version "1.3.180"}}
+ :aliases {:run {:exec-fn kees.clytemnestra.main/piet}
+           :test {:extra-paths ["test"]
+                  :extra-deps {io.github.cognitect-labs/test-runner {:git/tag "v0.5.1" :git/sha "dfb30dd"}}
+                  :exec-fn cognitect.test-runner.api/test
+                  :main-opts ["-m" "cognitect.test-runner"]}}}
