@@ -233,11 +233,11 @@
    :steps inc))
 
 (defn interpreter
-  [canvas verbose?]
+  [canvas verbose? limit]
   (when verbose? (println "Hi!"))
   (loop [state (assoc seed :block (find-block canvas (:pointer seed)))]
-    (when (< 100 (:steps state))
-      (throw (Exception. "Too many steps")))
+    (when (< limit (:steps state))
+      (throw (Exception. "Number of steps exceeded limit")))
     (when-not (seq (:pointer state))
       (throw (Exception. "The pointer got lost!")))
     (let [instruction (instruct canvas state)]
@@ -246,24 +246,3 @@
       (if (:terminate? state)
         state
         (recur (tick-state canvas state instruction))))))
-
-;; ========== SAMPLES ==========================================================
-(comment
-  (let [canvas (-> "programs/factorial.png"
-                   get-image
-                   (make-canvas 25))]
-    (find-block canvas [4 2]))
-
-  (let [pointer [4 4]
-        canvas (-> "programs/sample-1.png"
-                   get-image
-                   (make-canvas 1))
-        state (assoc seed
-                     :block (find-block canvas pointer)
-                     :pointer pointer)]
-    (state-slide canvas state))
-
-  (let [canvas (-> "programs/pi.png"
-                   get-image
-                   (make-canvas 3))]
-    (interpreter canvas false)))

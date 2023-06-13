@@ -12,6 +12,14 @@ Initial commit: All this does is traverse codel blocks. It doesn't execute anyth
 
 Boo-hoo.. I tried to get fancy with the DP/CC and it's not happy. It picks the wrong exit points on large blocks by always checking column then row.
 
+### To run
+
+```sh
+clj -X:run '{:file "programs/file.png"}'
+```
+
+`:codel-size` and `verbose?` default to `1` and `true`.
+
 ### Program status
 
 - [factorial](./programs/factorial.png) ❌ no pointer manipulation
@@ -25,7 +33,7 @@ Most of the programs are reused or slightly edited from [Piet sample programs](h
 
 ## Appendix
 
-## A. Language overview
+### A. Language overview
 
 Piet scripts are images, or, 2D arrays of pixels representing a predetermined set of color values.
 
@@ -51,7 +59,7 @@ On white blocks the pointer acts differently from colorful spaces. Instead of a 
 
 Instead of terminating after 8 unsuccessful checks in each possible block outlet, a program caught in whitespace terminates once its path of checks loops back onto itself.
 
-Two termination cases add some unpleasant complexity, but whitespace handling is more intuitive.
+Two termination cases adds some unpleasant complexity, but whitespace handling is more intuitive.
 
 ### Questions
 
