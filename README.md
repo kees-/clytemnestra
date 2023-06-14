@@ -1,14 +1,14 @@
 ## Background
 
-This is a dysfunctional [Piet](https://www.dangermouse.net/esoteric/piet.html) intepreter in Clojure designed for:
+This is a dysfunctional [Piet](https://www.dangermouse.net/esoteric/piet.html) intepreter in Clojure with design goals of:
 
 - the code to be pretty comprehensible
 - the corners softened with decent errors and forgiving treatment of edge cases
 - runtime verbosity that is comprehensive but not overwhelming.
 
-[clj-piet](https://github.com/ljos/clj-piet) exists, check my fork, but it's over a decade old and doesn't traverse whitespace as per the updated spec. This project is inspired and takes influence from that one but is just my updated personal rewrite.
+Codel blocks are traversed correctly, piet commands are implemented, reading color shifts is trivial, now just need to clean up state dispatching and insert piet command lookup 🙂
 
-Initial commit: All this does is traverse codel blocks. It doesn't execute anything, chiefly, commands that adjust the pointer.
+[clj-piet](https://github.com/ljos/clj-piet) exists, check my fork, but it's over a decade old and doesn't traverse whitespace as per the updated spec. This project is inspired by and takes influence from that one but is just my updated personal rewrite.
 
 ### To run
 
@@ -20,8 +20,8 @@ clj -X:run '{:file "programs/file.png"}'
 
 ### Program status
 
-- [factorial](./programs/factorial.png) ❌ no pointer manipulation
-- [hello-world-1](./programs/hello-world-1.png) ❌ no pointer manipulation
+- [factorial](./programs/factorial.png) ❌ pointer manipulation not connected
+- [hello-world-1](./programs/hello-world-1.png) ❌ pointer manipulation not connected
 - [hello-world-2](./programs/hello-world-2.png) ✅
 - [hello-world-3](./programs/hello-world-3.png) ✅
 - [pi](./programs/pi.png) ✅
@@ -79,7 +79,7 @@ I imagine a language equally difficult to deal with for different reasons, where
 
 - area: int value
 - ∆R: command to execute
-- ∆G: relative X offset to next codel
-- ∆B: relative Y offset to next codel
+- G: relative X offset to next codel
+- B: relative Y offset to next codel
 
 That would be chaos...

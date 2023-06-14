@@ -116,15 +116,15 @@
         "Very large value CC rotation works"))
 
   (testing "Testing roll"
-    (is (= '(3 4 5 1 2 6 7) (:stack (lang/proll {:stack '(5 2 1 2 3 4 5 6 7)})))
+    (is (= '(3 4 5 1 2 6 7) (:stack (lang/proll {:stack '(2 5 1 2 3 4 5 6 7)})))
         "Good roll is good")
     (is (= '(1 2 3 4 5) (:stack (lang/proll {:stack '(3 3 1 2 3 4 5)})))
         "depth=n roll is ignored")
-    (is (= '(10 4 1 2 3 4 5) (:stack (lang/proll {:stack '(10 4 1 2 3 4 5)})))
+    (is (= '(4 10 1 2 3 4 5) (:stack (lang/proll {:stack '(4 10 1 2 3 4 5)})))
         "Roll out of its depth is ignored")
-    (is (= '(-2 3 1 2 3 4 5) (:stack (lang/proll {:stack '(-2 3 1 2 3 4 5)})))
+    (is (= '(3 -2 1 2 3 4 5) (:stack (lang/proll {:stack '(3 -2 1 2 3 4 5)})))
         "Negative depth roll is ignored")
-    (is (= '(4 5 1 2 3 6 7) (:stack (lang/proll {:stack '(5 8 1 2 3 4 5 6 7)})))
+    (is (= '(4 5 1 2 3 6 7) (:stack (lang/proll {:stack '(8 5 1 2 3 4 5 6 7)})))
         "Weird roll is weird but okay"))
   
   ;; Input can't really be automatically tested

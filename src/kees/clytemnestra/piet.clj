@@ -39,7 +39,7 @@
          count)))
 
 (defn find-hue-shift
-  "Find Piet's 'distance' between two colors"
+  "Find Piet's X Y 'distance' between two colors."
   [[a b] [c d]]
   [(cycle-difference a c 6)
    (cycle-difference b d 3)])
@@ -119,12 +119,11 @@
   "Implementation for rolling the stack once to given depth."
   [depth +?]
   (fn [stack]
-    (if +?
-      (reduce into []
+    (reduce into []
+            (if +?
               [(rest (take depth stack))
                (take 1 stack)
-               (drop depth stack)])
-      (reduce into []
+               (drop depth stack)]
               [(take 1 (drop (dec depth) stack))
                (take (dec depth) stack)
                (drop depth stack)]))))
@@ -132,7 +131,7 @@
 (defn proll
   "Piet's weird command"
   [{:keys [stack] :as state}]
-  (let [[depth n] stack]
+  (let [[n depth] stack]
     (if (or (not n)
             (< depth 2)
             (< (- (count stack) 2) depth))
@@ -144,7 +143,8 @@
                               (or (seq c) '()))))))
 
 (defn pinn
-  "Ask for a signed integer input and push onto the stack."
+  "Ask for a signed integer input and push onto the stack.
+   Does not handle values outside i32!"
   [state]
   (let [input (do (print "Number input: ")
                   (flush)
