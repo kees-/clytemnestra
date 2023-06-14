@@ -6,14 +6,18 @@
 
 ;; Conventions
 ;; 
-;; Canvas: 2D array of a piet program as points of [:color :tone]
-;;   This includes white and black! Which don't have tones.
-;;   :color is first so that color lookups happen uniformly,
-;;   and tone lookups for black and white—which shouldn't happen anyway—are nil.
+;; Canvas: 2D array of a piet program as points of [m n], [:white], or [:black].
+;;    m and n correspond to lookup coords for their location in the color cycle.
+;;    This way, arbitrary palettes could be supplied.
 ;; 
 ;; Compass: combination of DP and CC.
 ;;   The CC is represented by -1 and 1. Gotcha! For a concise flip.
 ;;   -1 left, 1 right
+;; 
+;; Bonks: Number of times pointer has consecutively hit a wall or edge.
+;; Slide: Movement mechanic for traversing whitespace.
+;; Continue: Logic for a valid move from one color block to another.
+;; Search: Unmoving compass rotation for finding valid block exits.
 
 ;; ========== IMAGE PROCESSING =================================================
 (def valid-formats ["png" "gif"])
@@ -81,6 +85,7 @@
   "The initial state of the interpreter."
   {:pointer [0 0]
    :block #{}
+   :color nil
    :value nil
    :stack '()
    :compass [:right -1]
@@ -148,16 +153,29 @@
   [_ state]
   (assoc state :terminate? true))
 
+(defn inspect-codel
+  "Check out what's going on at the current codel's block."
+  [canvas {:keys [pointer] :as state}]
+  (let [block (find-block canvas pointer)]
+    (assoc state
+           :color (get-in canvas pointer)
+           :block block
+           :value (count block))))
+
 (defn state-continue
   "Exit the extreme of the current block into the next."
   [canvas state]
-  (let [{:keys [block]} state
-        new-pointer (next-step state)]
+  (let [{:keys [block color]} state
+        new-pointer (next-step state)
+        new-color (get-in canvas new-pointer)
+        command (get-in p/commands (p/find-hue-shift color new-color))]
     (-> state
         (assoc :bonks 0
-               :pointer new-pointer
                :value (count block)
-               :block (find-block canvas new-pointer)))))
+               :pointer new-pointer
+               :color new-color
+               :block (find-block canvas new-pointer))
+        command)))
 
 (defn state-search
   "Having determined the pointer can't step forward,
@@ -188,9 +206,7 @@
              codel (get-in canvas new-pointer)]
          (if (and (some? codel) (not= [:black] codel))
             ;; Exit point
-           (assoc state
-                  :pointer new-pointer
-                  :block (find-block canvas new-pointer))
+           (inspect-codel canvas (assoc state :pointer new-pointer))
            (recur canvas
                   (-> state
                       (update-in [:compass 0] p/clockwise)
@@ -210,15 +226,16 @@
     (instruction canvas (update state :steps inc))))
 
 (defn interpreter
+  "Main interpreter machine.. Returns the statemap of a terminated program"
   [canvas verbose? limit]
-  (when verbose? (println "Hi!"))
-  (loop [state (assoc seed :block (find-block canvas (:pointer seed)))]
-    (when (and (pos? limit) (< limit (:steps state)))
-      (throw (Exception. "Number of steps exceeded limit")))
-    (when-not (seq (:pointer state))
+  (loop [state (inspect-codel canvas seed)]
+    (cond
+      (and (pos? limit) (< limit (:steps state)))
+      (throw (Exception. "Number of steps exceeded limit"))
+      (not (seq (:pointer state)))
       (throw (Exception. "The pointer got lost!")))
     (let [instruction (instruct canvas state)]
-      (when verbose? (println instruction (dissoc state :block)))
+      (when verbose? (println (dissoc state :block)))
       (if (:terminate? state)
         state
         (recur (tick-state canvas state instruction))))))

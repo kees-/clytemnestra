@@ -1,12 +1,12 @@
 ## Background
 
-This is a dysfunctional [Piet](https://www.dangermouse.net/esoteric/piet.html) intepreter in Clojure with design goals of:
+It's alive! This is a [Piet](https://www.dangermouse.net/esoteric/piet.html) intepreter in Clojure with design goals of:
 
 - the code to be pretty comprehensible
 - the corners softened with decent errors and forgiving treatment of edge cases
 - runtime verbosity that is comprehensive but not overwhelming.
 
-Codel blocks are traversed correctly, piet commands are implemented, reading color shifts is trivial, now just need to clean up state dispatching and insert piet command lookup 🙂
+![Example running the program from the command line](./resources/sample.png)
 
 [clj-piet](https://github.com/ljos/clj-piet) exists, check my fork, but it's over a decade old and doesn't traverse whitespace as per the updated spec. This project is inspired by and takes influence from that one but is just my updated personal rewrite.
 
@@ -20,12 +20,14 @@ clj -X:run '{:file "programs/file.png"}'
 
 ### Program status
 
-- [factorial](./programs/factorial.png) ❌ pointer manipulation not connected
-- [hello-world-1](./programs/hello-world-1.png) ❌ pointer manipulation not connected
+- [corner-test](./programs/corner-test.png) ✅
+- [factorial](./programs/factorial.png) ✅
+- [hello-world-1](./programs/hello-world-1.png) ✅
 - [hello-world-2](./programs/hello-world-2.png) ✅
 - [hello-world-3](./programs/hello-world-3.png) ✅
-- [pi](./programs/pi.png) ✅
-- [corner-test](./programs/corner-test.png) ✅
+- [pi](./programs/pi.png) ❌ Int madness
+- [tetris](./programs/tetris.png) ✅
+- [whitespace-test](./programs/corner-test.png) ✅
 
 Most of the programs are reused or slightly edited from [Piet sample programs](https://www.dangermouse.net/esoteric/piet/samples.html).
 
@@ -48,6 +50,19 @@ Piet has 18 program colors and two utility shades (walls and open space), see be
 ![Table of piet colors, hex codes, java rbg ints, and rgb trios](./resources/table.svg)
 
 Hex, the RGB ints that `.getRGB` returns, and RGB.
+
+### C. Available commands
+
+⬇️ hue shift ➡️ tone shift
+
+|     | +0        | +1      | +2       |
+| --- | --------- | ------- | -------- |
+| +0  |           | push    | pop      |
+| +1  | +         | -       | *        |
+| +2  | /         | mod     | not      |
+| +3  | >         | pointer | switch   |
+| +4  | duplicate | roll    | int in   |
+| +5  | char in   | int out | char out |
 
 ### Gotchas
 

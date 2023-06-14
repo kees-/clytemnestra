@@ -43,7 +43,7 @@
             <td class="tg-y5fa">FFFFC0<br />-64<br />255 255 192</td>
             <td class="tg-76ql">C0FFC0<br />-4128832<br />192 255 192</td>
             <td class="tg-g512">C0FFFF<br />-4128769<br />192 255 255</td>
-            <td class="tg-1icd">C0C0FF<br />-4144897<br />255 192 192</td>
+            <td class="tg-1icd">C0C0FF<br />-4144897<br />192 192 255</td>
             <td class="tg-085m">FFC0FF<br />-16129<br />255 192 255</td>
           </tr>
           <tr>
