@@ -1,7 +1,8 @@
 (ns kees.clytemnestra.impl
   (:import javax.imageio.ImageIO)
   (:require [babashka.fs :as fs]
-            [clojure.set :as set]))
+            [clojure.set :as set]
+            [kees.clytemnestra.piet :as p]))
 
 ;; Conventions
 ;; 
@@ -28,35 +29,11 @@
       (not (some #(= ext %) valid-formats)) (throw (Exception. (format "Invalid file format. Give a file of type %s" valid-formats)))
       :else f)))
 
-;; A hardcoded lookup of java color ints to piet colors
-;; is presumably a fine bypass for intermediate RGB values.
-(def color-map
-  {-1        [:white]
-   -16777216 [:black]
-   -16192    [:red     :light]
-   -64       [:yellow  :light]
-   -4128832  [:green   :light]
-   -4128769  [:cyan    :light]
-   -4144897  [:blue    :light]
-   -16129    [:magenta :light]
-   -65536    [:red     :normal]
-   -256      [:yellow  :normal]
-   -16711936 [:green   :normal]
-   -16711681 [:cyan    :normal]
-   -16776961 [:blue    :normal]
-   -65281    [:magenta :normal]
-   -4194304  [:red     :dark]
-   -4145152  [:yellow  :dark]
-   -16728064 [:green   :dark]
-   -16727872 [:cyan    :dark]
-   -16777024 [:blue    :dark]
-   -4194112  [:magenta :dark]})
-
 (defn image->canvas
   "Take an image file with dimensions and find color values for every pixel."
   [file w h size]
   (let [column (fn [n h]
-                 (mapv #(color-map (.getRGB file n (* % size)))
+                 (mapv #(p/color-map (.getRGB file n (* % size)))
                        (range h)))]
     (mapv #(column (* % size) h)
           (range w))))
@@ -109,13 +86,8 @@
    :compass [:right -1]
    :bonks 0
    :steps 0
-   :output ""
+   :output '()
    :terminate? false})
-
-;; I don't want to do a bunch of BS rotating stateful pointer sequences
-;; Hardcoded CW and CCW cycles are easier...
-(def clockwise {:right :down :down :left :left :up :up :right})
-(def counterclockwise {:right :up :up :left :left :down :down :right})
 
 (def compasses
   {[:right :up] [max min]
@@ -133,7 +105,7 @@
         [dp cc] compass]
     (if (= 1 (count block))
       (first block)
-      (let [absolute-cc (dp (if (pos? cc) clockwise counterclockwise))
+      (let [absolute-cc (dp (if (pos? cc) p/clockwise p/counterclockwise))
             order (if (some #{dp} [:up :down]) reverse identity)
             [extreme-1 extreme-2] (order (compasses (sort [dp absolute-cc])))
             [axis-1 axis-2] (order [first second])
@@ -157,7 +129,7 @@
   [state]
   (if (even? (:bonks state))
     (update-in state [:compass 1] -)
-    (update-in state [:compass 0] clockwise)))
+    (update-in state [:compass 0] p/clockwise)))
 
 (defn instruct
   "Takes the state and returns the next effect.
@@ -221,7 +193,7 @@
                   :block (find-block canvas new-pointer))
            (recur canvas
                   (-> state
-                      (update-in [:compass 0] clockwise)
+                      (update-in [:compass 0] p/clockwise)
                       (update-in [:compass 1] -)
                       (assoc :pointer end))
                   (conj visited position))))))))
