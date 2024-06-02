@@ -1,8 +1,9 @@
 (ns kees.clytemnestra.impl
-  (:import javax.imageio.ImageIO)
+  #?(:clj (:import javax.imageio.ImageIO))
   (:require [babashka.fs :as fs]
             [clojure.set :as set]
-            [kees.clytemnestra.piet :as p]))
+            [kees.clytemnestra.piet :as p]
+            #?(:bb [babashka.process :refer [shell]])))
 
 ;; Conventions
 ;; 
